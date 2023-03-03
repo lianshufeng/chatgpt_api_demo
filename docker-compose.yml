@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  aichar:
+    image: node:19
+    # ports:
+      # - "8080:8080"
+    volumes:
+      - "./:/opt/chat"
+    working_dir: /opt/chat
+    container_name: chat
+    restart: always
+    command: node main.js
+    networks:
+      - custom_net
+networks:
+  custom_net:
+   external:
+      name: app_net

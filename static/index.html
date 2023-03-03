@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- import CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <title> Chat - AI </title>
+
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?c780683958cf546a774f3b91ca43b8d6";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+    <style>
+        .box-card {
+            width: 100%;
+        }
+    </style>
+
+
+</head>
+<body>
+<div id="app">
+
+    <el-card class="box-card">
+        <div slot="header" class="clearfix">
+            <span style="font-size: 12px; float: right">gpt-3.5-turbo 2023-3-2</span>
+        </div>
+
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+                border="true">
+            <el-table-column
+                    prop="time"
+                    label="时间"
+                    width=100>
+            </el-table-column>
+            <el-table-column
+                    prop="Human"
+                    label="用户">
+            </el-table-column>
+            <el-table-column
+                    prop="AI"
+                    label="AI">
+            </el-table-column>
+        </el-table>
+
+    </el-card>
+
+
+    <el-form>
+        <el-form-item label="输入文本">
+            <el-input type="textarea" v-model="text" label="Please enter"
+                      @keydown.native="handleKeyCode($event)"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="addQuery" v-text="btnText" :disabled="btnDisable">...</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+</body>
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    const vue = new Vue({
+        el: '#app',
+        methods: {
+            handleKeyCode(event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    vue.addQuery();
+                }
+            },
+            disableBtn() {
+                this.btnDisable = true;
+                this.btnText = '处理中';
+            },
+            enableBtn() {
+                this.btnDisable = false;
+                this.btnText = '发送';
+            },
+            addQuery() {
+                const date = new Date();
+                let text = this.text.trim();
+                //过滤空文本或禁用状态
+                if (!text || text == '' || this.btnDisable == true) {
+                    return;
+                }
+                this.text = ''
+                let item = {
+                    time: date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds(),
+                    Human: text,
+                    AI: ''
+                }
+                this.tableData.push(item);
+                const history = this.tableData;
+                let index = this.tableData.length - 1;
+                const options = {
+                    method: "POST",
+                    data: history,
+                    url: './chat',
+                    // stream: true,
+                    responseType: "stream",
+                    onUploadProgress: function (progressEvent) {
+                        // console.log('progressEvent', progressEvent)
+                    },
+                    // 浏览器
+                    onDownloadProgress: function (onDownloadProgress) {
+                        // console.log('onDownloadProgress', onDownloadProgress)
+                        vue.tableData[index].AI = onDownloadProgress.event.currentTarget.responseText;
+                    },
+                };
+
+                this.disableBtn();
+                axios(options).then(function (response) {
+                    // 处理成功情况
+                    vue.tableData[index].AI = response.data;
+                    vue.enableBtn();
+                }).catch(function (error) {
+                    // 处理错误情况
+                    console.log(error);
+
+                    //删除最后一个
+                    vue.tableData.splice(index, 1)
+
+                    //恢复输入文本
+                    vue.text = text;
+
+                    //恢复
+                    vue.enableBtn();
+
+                });
+
+
+            }
+        },
+        data() {
+            return {
+                btnDisable: false,
+                btnText: '发送',
+                text: '请推荐一些稀缺的职业',
+                tableData: []
+            }
+        }
+    })
+</script>
+</html>
