@@ -1,5 +1,5 @@
  
-### gpt-3.5-turbo demo cdn stream  
+### gpt-3.5-turbo demo cdn stream vuejs
 
 - demo
 ````
