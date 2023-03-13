@@ -8,15 +8,15 @@
     <title> Chat - AI </title>
 
 
-        <script>
-            var _hmt = _hmt || [];
-            (function () {
-                var hm = document.createElement("script");
-                hm.src = "https://hm.baidu.com/hm.js?c780683958cf546a774f3b91ca43b8d6";
-                var s = document.getElementsByTagName("script")[0];
-                s.parentNode.insertBefore(hm, s);
-            })();
-        </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?c780683958cf546a774f3b91ca43b8d6";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 
     <style>
         .box-card {
@@ -38,6 +38,8 @@
             <el-timeline>
                 <el-timeline-item v-for="(item, index) in lines" :key="index"
                                   :timestamp="item.caption +' '+ '('+item.time+')'"
+                                  :icon="item.icon"
+                                  :type="item.type"
                                   placement="top"
                                   size="large">
                     <el-card>
@@ -96,6 +98,8 @@
                         caption: "AI",
                         role: "assistant",
                         time: date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds(),
+                        icon: "el-icon-dish",
+                        type: "success",
                         content: ''
                     }
                     vue.lines.push(item);
@@ -115,6 +119,8 @@
                     caption: "我",
                     role: "user",
                     time: date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds(),
+                    icon: "el-icon-user-solid",
+                    type: "primary",
                     content: text
                 }
                 this.lines.push(item);
@@ -146,7 +152,7 @@
                     console.log(error);
 
                     //删除最后一个
-                    vue.tableData.splice(index, 1)
+                    vue.lines.splice(vue.lines.length - 1, 1)
 
                     //恢复输入文本
                     vue.text = text;
