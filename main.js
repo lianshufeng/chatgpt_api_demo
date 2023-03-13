@@ -2,12 +2,24 @@ const {Configuration, OpenAIApi} = require("openai");
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const config = require('./config')
+
+
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 
+let checkConfig = () => {
+    if (!config.apiKey) {
+        throw "apiKey 不能为空"
+    }
+}
+
+checkConfig();
+
+
 const configuration = new Configuration({
-    apiKey: "<apikey>"
+    apiKey: config.apiKey
 });
 
 
@@ -17,13 +29,19 @@ const openai = new OpenAIApi(configuration, 'https://openai.jpy.wang/v1');
 const query = async function (req, res) {
     const body = req.body;
 
-    const messageBody = []
-    body.forEach((it) => {
-        messageBody.push({"role": "user", "content": it.Human});
-        if (it.AI && it.AI != '') {
-            messageBody.push({"role": "assistant", "content": it.AI});
-        }
-    })
+    console.log(body);
+
+    const messageBody = body.map(it=>{
+        return {"role": it.role, "content": it.content};
+    });
+
+    // const messageBody = []
+    // body.forEach((it) => {
+    //     messageBody.push({"role": "user", "content": it.Human});
+    //     if (it.AI && it.AI != '') {
+    //         messageBody.push({"role": "assistant", "content": it.AI});
+    //     }
+    // })
     console.log(JSON.stringify(messageBody))
 
 

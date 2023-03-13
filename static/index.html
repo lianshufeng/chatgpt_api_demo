@@ -8,15 +8,15 @@
     <title> Chat - AI </title>
 
 
-    <script>
-        var _hmt = _hmt || [];
-        (function () {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?c780683958cf546a774f3b91ca43b8d6";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+        <script>
+            var _hmt = _hmt || [];
+            (function () {
+                var hm = document.createElement("script");
+                hm.src = "https://hm.baidu.com/hm.js?c780683958cf546a774f3b91ca43b8d6";
+                var s = document.getElementsByTagName("script")[0];
+                s.parentNode.insertBefore(hm, s);
+            })();
+        </script>
 
     <style>
         .box-card {
@@ -34,24 +34,19 @@
             <span style="font-size: 12px; float: right">gpt-3.5-turbo 2023-3-2</span>
         </div>
 
-        <el-table
-                :data="tableData"
-                style="width: 100%"
-                border="true">
-            <el-table-column
-                    prop="time"
-                    label="时间"
-                    width=100>
-            </el-table-column>
-            <el-table-column
-                    prop="Human"
-                    label="用户">
-            </el-table-column>
-            <el-table-column
-                    prop="AI"
-                    label="AI">
-            </el-table-column>
-        </el-table>
+        <div class="block">
+            <el-timeline>
+                <el-timeline-item v-for="(item, index) in lines" :key="index"
+                                  :timestamp="item.caption +' '+ '('+item.time+')'"
+                                  placement="top"
+                                  size="large">
+                    <el-card>
+                        <span>{{item.content}}</span>
+                    </el-card>
+                </el-timeline-item>
+
+            </el-timeline>
+        </div>
 
     </el-card>
 
@@ -92,22 +87,38 @@
                 this.btnDisable = false;
                 this.btnText = '发送';
             },
+
+            getAIChat() {
+                let item = vue.lines[vue.lines.length - 1];
+                if (item.role != 'assistant') {
+                    let date = new Date();
+                    item = {
+                        caption: "AI",
+                        role: "assistant",
+                        time: date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds(),
+                        content: ''
+                    }
+                    vue.lines.push(item);
+                }
+                return item;
+            },
             addQuery() {
-                const date = new Date();
+
                 let text = this.text.trim();
                 //过滤空文本或禁用状态
                 if (!text || text == '' || this.btnDisable == true) {
                     return;
                 }
                 this.text = ''
+                const date = new Date();
                 let item = {
+                    caption: "我",
+                    role: "user",
                     time: date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds(),
-                    Human: text,
-                    AI: ''
+                    content: text
                 }
-                this.tableData.push(item);
-                const history = this.tableData;
-                let index = this.tableData.length - 1;
+                this.lines.push(item);
+                const history = this.lines;
                 const options = {
                     method: "POST",
                     data: history,
@@ -120,14 +131,15 @@
                     // 浏览器
                     onDownloadProgress: function (onDownloadProgress) {
                         // console.log('onDownloadProgress', onDownloadProgress)
-                        vue.tableData[index].AI = onDownloadProgress.event.currentTarget.responseText;
+                        item = vue.getAIChat()
+                        item.content = onDownloadProgress.event.currentTarget.responseText;
                     },
                 };
 
                 this.disableBtn();
                 axios(options).then(function (response) {
                     // 处理成功情况
-                    vue.tableData[index].AI = response.data;
+                    vue.getAIChat().content = response.data;
                     vue.enableBtn();
                 }).catch(function (error) {
                     // 处理错误情况
@@ -152,7 +164,7 @@
                 btnDisable: false,
                 btnText: '发送',
                 text: '请推荐一些稀缺的职业',
-                tableData: []
+                lines: []
             }
         }
     })
