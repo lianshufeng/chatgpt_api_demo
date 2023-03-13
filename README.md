@@ -2,9 +2,7 @@
 ### gpt-3.5-turbo demo cdn stream vuejs
 
 - demo
-````
-https://chat.jpy.wang
-````
+[OpenAI GPT-3.5 Turbo API](https://chat.jpy.wang).
 
 - run
 ````shell
